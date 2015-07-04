@@ -262,7 +262,9 @@ for idx, road in enumerate(roadPointWidthMap.keys()):
 
     else:
 
-        x, y = catmull_rom(xData, yData, 100)
+        x, y = catmull_rom(xData, yData, 1)
+        x= xData
+        y=yData
  
         centerLaneSegments.append([x, y])
 
