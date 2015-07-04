@@ -19,6 +19,7 @@ def catmull_rom_one_point(x, v0, v1, v2, v3):
     c3 = 1. * v0 + -2.5 * v1 + 2. * v2 -.5 * v3
     c4 = -.5 * v0 + 1.5 * v1 + -1.5 * v2 + .5 * v3
     return (((c4 * x + c3) * x + c2) * x + c1)
+
 def catmull_rom_one_point_not_scaled(x, y0, y1, y2, y3, x0, x1, x2, x3):
     """Computes interpolated y-coord for given x-coord using Catmull-Rom.
 
@@ -57,8 +58,43 @@ def catmull_rom_one_point_not_scaled(x, y0, y1, y2, y3, x0, x1, x2, x3):
     result = catmull_rom_one_point(x, v0, v1, v2, v3)
     #print result
     return  result
+def catmull_rom_scale_inputs(y0, y1, y2, y3, x0, x1, x2, x3):
+    """Computes interpolated y-coord for given x-coord using Catmull-Rom.
 
-def catmull_rom(p_x, p_y, res):
+    Computes an interpolated y-coordinate for the given x-coordinate between
+    the support points v1 and v2. The neighboring support points v0 and v3 are
+    used by Catmull-Rom to ensure a smooth transition between the spline
+    segments.
+    Args:
+        x: the x-coord, for which the y-coord is needed
+        v0: 1st support point
+        v1: 2nd support point
+        v2: 3rd support point
+        v3: 4th support point
+    """
+    #print "y0, y1, y2, y3, x0, x1, x2, x3", y0, y1, y2, y3, x0, x1, x2, x3
+
+    v1=y1
+    v2=y2
+    normalizeTo=np.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
+    v0=v1-(y1-y0)/np.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0))* normalizeTo
+    v3=v2+(y3-y2)/np.sqrt((x3-x2)*(x3-x2) + (y3-y2)*(y3-y2))* normalizeTo
+
+    #p_y2= [v0, v1, v2, v3]
+    #print "normalize to ", normalizeTo
+    #print "p_y2", p_y2
+    #p_x2= [-1*normalizeTo, 0*normalizeTo, 1*normalizeTo, 2*normalizeTo]
+    
+    #x_int_temp = np.linspace(0.,1.*normalizeTo, 10, endpoint=False)
+    #y_intpol  = np.array([ catmull_rom_one_point(x, v0, v1, v2, v3)  for x in np.linspace(0.,1.,10, endpoint=False)])
+    #print "y_intpol", y_intpol
+    #plt.figure()
+    #plt.plot(p_x2,p_y2,'o-',x_int_temp,y_intpol,'b+-')
+    #plt.legend(['data', 'catmull', 'cubic'], loc='best')
+        #plt.plot(x, y, 'b+')
+    #plt.show()
+    return  [v0 ,v1, v2, v3]
+def catmull_rom(p_x, p_y, res, res_per_dist):
     """Computes Catmull-Rom Spline for given support points and resolution.
 
     Args:
@@ -82,11 +118,9 @@ def catmull_rom(p_x, p_y, res):
             p_x[i], p_x[i+1], res, endpoint=False)
         if i == 0:
             # need to estimate an additional support point before the first
-            print "need to estimate an additional support point before the first" , i, p_y[0] - (p_y[1] - p_y[0]),  p_y[0],p_y[1], p_y[2]
-            print p_y
-            y_intpol[:res] = np.array([
-                catmull_rom_one_point_not_scaled(
-                    x,
+            #print "need to estimate an additional support point before the first" , i, p_y[0] - (p_y[1] - p_y[0]),  p_y[0],p_y[1], p_y[2]
+            #print p_y
+            [v0,v1,v2,v3]=catmull_rom_scale_inputs(
                     p_y[0] - (p_y[1] - p_y[0]), # estimated start point,
                     p_y[0],
                     p_y[1],
@@ -95,26 +129,24 @@ def catmull_rom(p_x, p_y, res):
                     p_x[0],
                     p_x[1],
                     p_x[2])
-                for x in np.linspace(0.,1.,res, endpoint=False)])
-            p_y2= [p_y[0] - (p_y[1] - p_y[0]),  p_y[0],p_y[1], p_y[2]]
-            p_x2= [p_x[0] - (p_x[1] - p_x[0]),  p_x[0],p_x[1], p_x[2]]
+            y_intpol[:res] = np.array([ catmull_rom_one_point(x,v0,v1,v2,v3) for x in np.linspace(0.,1.,res, endpoint=False)])
+            #p_y2= [p_y[0] - (p_y[1] - p_y[0]),  p_y[0],p_y[1], p_y[2]]
+            #p_x2= [p_x[0] - (p_x[1] - p_x[0]),  p_x[0],p_x[1], p_x[2]]
             #plt.figure()
             #plt.scatter(p_x, p_y)
             #plt.scatter(x_intpol, y_intpol)
             #plt.plot(x_intpol, y_intpol, 'ro-', p_x, p_y, 'b+')
-            x_int_temp = np.linspace(p_x[i], p_x[i+1], res, endpoint=False)
+            #x_int_temp = np.linspace(p_x[i], p_x[i+1], res, endpoint=False)
             #print "x_int_temp", x_int_temp
             #print "y_intpol[:res]",y_intpol[:res]
             #plt.plot(p_x2,p_y2,'o-',x_int_temp,y_intpol[:res],'b+-')
             #plt.legend(['data', 'catmull', 'cubic'], loc='best')
-                #plt.plot(x, y, 'b+')
+            #plt.plot(x, y, 'b+')
             #plt.show()
         elif i == len(p_x) - 2:
             # need to estimate an additional support point after the last
-            print  "need to estimate an additional support point after the last " , i
-            y_intpol[i*res:-1] = np.array([
-                catmull_rom_one_point_not_scaled(
-                    x,
+            #print  "need to estimate an additional support point after the last " , i
+            [v0,v1,v2,v3]=catmull_rom_scale_inputs(
                     p_y[i-1],
                     p_y[i],
                     p_y[i+1],
@@ -122,12 +154,12 @@ def catmull_rom(p_x, p_y, res):
                     p_x[i-1],
                     p_x[i],
                     p_x[i+1],
-                    p_x[i+1] + (p_x[i+1] - p_x[i]) 
-                ) for x in np.linspace(0.,1.,res, endpoint=False)])
+                    p_x[i+1] + (p_x[i+1] - p_x[i]))
+                    
+            
+            y_intpol[i*res:-1] = np.array([ catmull_rom_one_point(x,v0,v1,v2,v3) for x in np.linspace(0.,1.,res, endpoint=False)])
         else:
-            y_intpol[i*res:(i+1)*res] = np.array([
-                catmull_rom_one_point_not_scaled(
-                    x,
+            [v0,v1,v2,v3]=catmull_rom_scale_inputs(
                     p_y[i-1],
                     p_y[i],
                     p_y[i+1],
@@ -135,8 +167,8 @@ def catmull_rom(p_x, p_y, res):
                     p_x[i-1],
                     p_x[i],
                     p_x[i+1],
-                    p_x[i+2]) for x in np.linspace(0.,1.,res, endpoint=False)])
-
-
+                    p_x[i+2])
+           
+            y_intpol[i*res:(i+1)*res] = np.array([ catmull_rom_one_point(x,v0,v1,v2,v3) for x in np.linspace(0.,1.,res, endpoint=False)])
     return (x_intpol, y_intpol)
 
