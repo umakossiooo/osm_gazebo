@@ -1,4 +1,6 @@
 import numpy as np
+#import matplotlib.pyplot as plt
+
 def catmull_rom_one_point(x, v0, v1, v2, v3):
     """Computes interpolated y-coord for given x-coord using Catmull-Rom.
 
@@ -94,7 +96,7 @@ def catmull_rom_scale_inputs(y0, y1, y2, y3, x0, x1, x2, x3):
         #plt.plot(x, y, 'b+')
     #plt.show()
     return  [v0 ,v1, v2, v3]
-def catmull_rom(p_x, p_y, res, res_per_dist):
+def catmull_rom(p_x, p_y, res):
     """Computes Catmull-Rom Spline for given support points and resolution.
 
     Args:
