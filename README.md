@@ -13,6 +13,8 @@
 	OpenCV
 	Mapnik:
 		https://github.com/mapnik/mapnik/wiki/UbuntuInstallation
+	Osmapi:
+		sudo pip install osmapi
 
 
 ## Files: ##
