@@ -143,7 +143,6 @@ class LaneBoundaries:
 		size[1] = boundarySize[1] * scalar
 
 		lineWidth = 6 * scalar # 6 pixels in 1 meter
-		lineWidth = 1
 
 		print ('| Scaled Size = [ ' + str(int(size[1])) + ' x ' + str(int(size[0])) + ' ] pixels')
 
@@ -318,24 +317,23 @@ class LaneBoundaries:
 
 		#cv2.imshow('image', self.img)
 
-		# imgInverted = np.zeros((size[1], size[0], 3) , np.uint8)
-		# imgInverted[:,:] = (255,255,255)
+		imgInverted = np.zeros((size[1], size[0], 3) , np.uint8)
+		imgInverted[:,:] = (255,255,255)
 
-		# imgGreyScale = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
+		imgGreyScale = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
 
-		# imgGreyScale = cv2.GaussianBlur(imgGreyScale,(5,5),0)
+		imgGreyScale = cv2.GaussianBlur(imgGreyScale,(5,5),0)
 
-		# edges = cv2.Canny(imgGreyScale, 100,200)
+		edges = cv2.Canny(imgGreyScale, 100,200)
 
-		# ret,thresh = cv2.threshold(edges,25,255,cv2.THRESH_TOZERO)
+		ret,thresh = cv2.threshold(edges,25,255,cv2.THRESH_TOZERO)
 
-		# imgGreyScale = cv2.bitwise_not( thresh )
+		imgGreyScale = cv2.bitwise_not( thresh )
 
-		# imgGreyScale = cv2.transpose(imgGreyScale)
-		# imgGreyScale = cv2.flip(imgGreyScale,flipCode=-1)
+		imgGreyScale = cv2.transpose(imgGreyScale)
+		imgGreyScale = cv2.flip(imgGreyScale,flipCode=-1)
 
-		# cv2.imwrite('map.png',imgGreyScale)
-		cv2.imwrite('map.png', self.img)
+		cv2.imwrite('map.png',imgGreyScale)
 		cv2.waitKey(0)
 		cv2.destroyAllWindows()
 		os.system('xdg-open ' + 'map.png')

@@ -262,10 +262,7 @@ for idx, road in enumerate(roadPointWidthMap.keys()):
 
     else:
 
-        x, y = catmull_rom(xData, yData, 100)
- 
-        # x = xData
-        # y = yData
+        x, y = catmull_rom(xData, yData, 10)
 
         centerLaneSegments.append([x, y])
 
@@ -293,6 +290,7 @@ for idx, road in enumerate(roadPointWidthMap.keys()):
         #plt.plot(xData, yData, 'bo', x, y, 'r-', xPointsA, yPointsA, 'g-', xPointsB, yPointsB, 'g-')
         #plt.plot(xPointsA, yPointsA, 'g-', xPointsB, yPointsB, 'g-')
         #plt.plot(xData, yData, 'ro-', x, y, 'b+')
+        #plt.legend(['data', 'catmull'], loc='best')
         ##plt.plot(x, y, 'b+')
         #plt.show()
 
