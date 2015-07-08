@@ -15,128 +15,14 @@ class LaneBoundaries:
 		self.img = 0
 		self.roadWidth = 6 #default 6 meters from left to right lane
 
-	# Code modeled off Road2d.cc from the Gazebo BitBucket
-	def createLanes(self, roadWidth):
-
-		self.roadWidth = roadWidth
-
-		lanePointsA = []
-		lanePointsB = []
-
-		if len(self.xPoints) != len(self.yPoints):
-			print ('X and Y points need to be equal! Stopping.')
-			return
-		else:
-
-			# since xPoints and yPoints lengths are equal, you can use 
-			# either lengths
-			for i in np.arange(len(self.xPoints)):
-
-				# initial scaling factor that is used to scale road width
-				# at turns
-				factor = 1.0
-
-				# initial tangent vector (2D array) between two points
-				tangent = 0
-
-				# the angle between:
-				# the tangent vector index i and i+1 
-				# and
-				# the tangent vector index i and i-1
-				#
-				# this angle later determines where the two side lane points will be 
-				# positioned 
-				theta = 0
-
-				# first case is special, no index behind the current one
-				if i == 0:
-					point1b = [self.xPoints[i+1], self.yPoints[i+1]]
-					point1a = [self.xPoints[i], self.yPoints[i]]
-
-					tangent = self.getTangent(point1a, point1b)
-
-					theta = np.arctan2(tangent[0], -tangent[1])
-
-				elif i == (len(self.xPoints)-1):
-					point1b = [self.xPoints[i], self.yPoints[i]]
-					point1a = [self.xPoints[i-1], self.yPoints[i-1]]
-
-					tangent = self.getTangent(point1a, point1b)
-					break
-				else:
-					point2b = [self.xPoints[i+1], self.yPoints[i+1]]
-					point2a = [self.xPoints[i], self.yPoints[i]]
-					vector2 = self.getTangent(point2a, point2b)
-
-					point1b = [self.xPoints[i], self.yPoints[i]]
-					point1a = [self.xPoints[i-1], self.yPoints[i-1]]
-					vector1 = self.getTangent(point1a, point1b)		
-
-					# points[i+1] - points[i-1]
-					point3b = [self.xPoints[i+1], self.yPoints[i+1]]
-					point3a = [self.xPoints[i-1], self.yPoints[i-1]]
-					tangent = self.getTangent(point3a, point3b)
-
-					dot = np.dot(vector1, vector2 * -1)
-
-					theta = np.arctan2(tangent[0], -tangent[1])
-
-					# here we are considering a point to be colinear 
-					# if it above +-0.97. If the dot product gives 
-					# less then +-0.97, that means the lane is turning
-					# so we need to adjust the width of the road with a 
-					# new temporary factor
-					if dot > -0.97 and dot < 0.97:
-						factor = 1.0 / np.sin(np.arccos(dot) * 0.5)
-
-				# original gps point; center between two lane points
-				gpsPtStart = [self.xPoints[i], self.yPoints[i]]
-				
-				pointA = [0,0]
-				pointB = [0,0]
-
-				# width is considered to be the distance from the center point
-				# to either of the side points. roadWidth/2 * factor
-				width = (self.roadWidth * factor) * 0.5
-
-				pointA[0] = gpsPtStart[0] + (np.cos(theta) * width)
-				pointA[1] = gpsPtStart[1] + (np.sin(theta) * width)
-
-				pointB[0] = gpsPtStart[0] - (np.cos(theta) * width)
-				pointB[1] = gpsPtStart[1] - (np.sin(theta) * width)
-
-				# store left and right lane points seperately
-				lanePointsA.append(pointA)
-				lanePointsB.append(pointB)
-
-			return lanePointsA, lanePointsB
-
-
-	def getTangent(self, point1, point2):
-		point = np.array([point2[0]-point1[0], point2[1]-point1[1]])
-
-		tangent = self.normalize(point)
-		return tangent
-
-	def normalize(self, vector):
-		dist = np.sqrt(vector[0]*vector[0] + vector[1]*vector[1])
-
-		if dist != 0:
-			u = vector[0]/dist
-			v = vector[1]/dist
-
-			return np.array([u,v])
-		else:
-			return vector
-
 
 	# size of image, scalar for pixel/meter, array containing all left and right road lane segments
-	def makeImage(self, boundarySize, scalar, roadLanes, centerLanes):
+	def makeImage(self, boundarySize, scalar, roadLanes, centerLanes, laneSegmentWidths):
 
 		size = [0,0]
 
 		if scalar <= 0:
-			print ('Cannot scale image < 0 size! Setting to (boundarySize * 1).')
+			print ('| Cannot scale image < 0 size! Setting to (boundarySize * 1). ')
 			scalar = 1
 		# [0] = x, and [1] = y
 		size[0] = boundarySize[0] * scalar
@@ -152,11 +38,13 @@ class LaneBoundaries:
 			self.imgInitialized = True
 
 		# drawing and inflating the middle lane.
-		for midLane in centerLanes:
+		for idx, midLane in enumerate(centerLanes):
 
 			xOffset = size[0]/2
 			yOffset = size[1]/2
 
+			laneWidth = int(math.ceil(laneSegmentWidths[idx] * 6 *scalar))
+			print "| MidLane Width: ", str(laneWidth)
 
 			if len(midLane[0]) > 2:
 
@@ -185,7 +73,7 @@ class LaneBoundaries:
 
 					# adding a line onto the overall entire image
 					# line width as 60 is equal to 4 meters
-					cv2.line(self.img, (startPointX,startPointY), (endPointX,endPointY), (255,255,255), lineWidth)
+					cv2.line(self.img, (startPointX,startPointY), (endPointX,endPointY), (255,255,255), laneWidth)
 			else:
 				# If there is only one point, we can draw anything, so disregard it
 				#print ('Road has LESS then four points!')
@@ -198,20 +86,20 @@ class LaneBoundaries:
 					endPointX = (int(midLane[0][1]* scalar) ) + xOffset
 					endPointY = (int(midLane[1][1]* scalar)) + yOffset
 
-					cv2.line(self.img, (startPointX,startPointY), (endPointX,endPointY), (255,255,255),lineWidth)
+					cv2.line(self.img, (startPointX,startPointY), (endPointX,endPointY), (255,255,255), laneWidth)
 
 				elif len(midLane[0]) <= 4 and len(midLane[0]) > 1:
 					startPointX = (int(midLane[0][0]* scalar) ) + xOffset
 					startPointY = (int(midLane[1][0]* scalar) ) + yOffset
 					endPointX = (int(midLane[0][1]* scalar) ) + xOffset
 					endPointY = (int(midLane[1][1]* scalar)) + yOffset
-					cv2.line(self.img, (startPointX,startPointY), (endPointX,endPointY), (255,255,255),lineWidth)
+					cv2.line(self.img, (startPointX,startPointY), (endPointX,endPointY), (255,255,255),laneWidth)
 
 					startPointX = (int(road[0][1]* scalar) ) + xOffset
 					startPointY = (int(road[1][1]* scalar) ) + yOffset
 					endPointX = (int(road[0][2]* scalar) ) + xOffset
 					endPointY = (int(road[1][2]* scalar)) + yOffset
-					cv2.line(self.img, (startPointX,startPointY), (endPointX,endPointY), (255,255,255),lineWidth)
+					cv2.line(self.img, (startPointX,startPointY), (endPointX,endPointY), (255,255,255),laneWidth)
 
 
 		# # Drawing the side lanes

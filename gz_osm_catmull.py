@@ -223,6 +223,7 @@ lanes = 0
 
 roadLaneSegments = []
 centerLaneSegments = []
+laneSegmentWidths = []
 
 #Include the roads in the map in sdf file
 for idx, road in enumerate(roadPointWidthMap.keys()):
@@ -232,6 +233,8 @@ for idx, road in enumerate(roadPointWidthMap.keys()):
 
     print ('| Road' + str(idx+1) + ': ' + road)
 
+    laneSegmentWidths.append(roadPointWidthMap[road]['width'])
+    print "|  -- Width: ", str(roadPointWidthMap[road]['width'])
 
     xData = points[0, :]
     yData = points[1, :]
@@ -268,31 +271,34 @@ for idx, road in enumerate(roadPointWidthMap.keys()):
 
         lanes = LaneBoundaries(x,y)
 
-        [lanePointsA, lanePointsB]  = lanes.createLanes(6)
+        # [lanePointsA, lanePointsB]  = lanes.createLanes(6)
 
-        roadLaneSegments.append([lanePointsA, lanePointsB])
+        # roadLaneSegments.append([lanePointsA, lanePointsB])
 
-        xPointsA = []
-        yPointsA = []
+        # xPointsA = []
+        # yPointsA = []
 
-        xPointsB = []
-        yPointsB = []
+        # xPointsB = []
+        # yPointsB = []
 
-        for i in range(len(lanePointsA)/2):
-            xPointsA.append(lanePointsA[i*2][0])
-            yPointsA.append(lanePointsA[i*2][1])
-            #sdfFile.addLeftLaneDebug([lanePointsA[i*2][0], lanePointsA[i*2][1], 0], road)
+        # for i in range(len(lanePointsA)/2):
+        #     xPointsA.append(lanePointsA[i*2][0])
+        #     yPointsA.append(lanePointsA[i*2][1])
+        #     #sdfFile.addLeftLaneDebug([lanePointsA[i*2][0], lanePointsA[i*2][1], 0], road)
 
-            xPointsB.append(lanePointsB[i*2][0])
-            yPointsB.append(lanePointsB[i*2][1])
-            #sdfFile.addRightLaneDebug([lanePointsB[i*2][0], lanePointsB[i*2][1], 0], road)
+        #     xPointsB.append(lanePointsB[i*2][0])
+        #     yPointsB.append(lanePointsB[i*2][1])
+        #     #sdfFile.addRightLaneDebug([lanePointsB[i*2][0], lanePointsB[i*2][1], 0], road)
 
+#### Debug
         #plt.plot(xData, yData, 'bo', x, y, 'r-', xPointsA, yPointsA, 'g-', xPointsB, yPointsB, 'g-')
         #plt.plot(xPointsA, yPointsA, 'g-', xPointsB, yPointsB, 'g-')
         #plt.plot(xData, yData, 'ro-', x, y, 'b+')
         #plt.legend(['data', 'catmull'], loc='best')
         ##plt.plot(x, y, 'b+')
         #plt.show()
+#### Debug
+
 
         # lanes.saveImage(size, lanePointsA, lanePointsB)
 
@@ -314,7 +320,7 @@ print ('|-----------------------------------')
 print ('|')
 size = osmRoads.getMapSize()
 #    args.imageFile = args.directory + args.imageFile
-lanes.makeImage(size, 5, roadLaneSegments, centerLaneSegments)
+lanes.makeImage(size, 5, roadLaneSegments, centerLaneSegments, laneSegmentWidths)
 
 print ('| Lat Center  = '+ str(osmRoads.getLat()))
 print ('| Lon Center  = '+ str(osmRoads.getLon()))
