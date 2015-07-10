@@ -2,7 +2,7 @@ import os
 
 class StageWorld:
 
-	def __init__(self, mapSize, imageSize, startCoordinates):
+	def __init__(self, mapSize, imageSize, startCoordinates, centerCoordinates):
 		self.xSize = mapSize[0]
 		self.ySize = mapSize[1]
 		self.zSize = 4 # high enough so laser detects walls
@@ -13,9 +13,12 @@ class StageWorld:
 		self.startLat = startCoordinates[0]
 		self.startLon = startCoordinates[1]
 
+		self.centerLat = centerCoordinates[0]
+		self.centerLon = centerCoordinates[1]
+
 	def createStageSetup(self, outputName):
 		#outputName = "poplar_ave"
-		tempOut = "../worlds/stage_ros/" + outputName + "/"
+		tempOut = "worlds/stage_ros/" + outputName + "/"
 		self.createStageWorldFile(outputName, tempOut)
 		self.createStageYamlFile(outputName,tempOut)
 
@@ -25,10 +28,12 @@ class StageWorld:
 			os.mkdir(outputDir)
 
 		# grab map.world template
-		tempWorld = open("templates/map.world-template", "r")
+		tempWorld = open("source/templates/map.world-template", "r")
 		worldTemplate = tempWorld.read()
 
-		fo = open(outputDir + outputName + ".world", "w") # open file for writing, create if not open
+		outputWorldName = outputName + ".world"
+
+		fo = open(outputDir + outputWorldName, "w") # open file for writing, create if not open
 		fo.write(worldTemplate)
 		fo.write("\nsize [ " + str(self.xSize) + " " + str(self.ySize) + " " + str(self.zSize) + " ]    #Map Size\n\n")
 
@@ -50,12 +55,27 @@ class StageWorld:
 		fo.write("  laser_return 1          # visible to lasers\n)\n\n")
 		fo.close()
 
+		print "| Created file", outputWorldName
+
 	def createStageYamlFile(self, outputName, outputDir):
 		#create stage world file should have already created the dir if necessary
-		print "YAML..."
+
+		outputYamlName = outputName + ".yaml"
+
+		fo = open(outputDir + outputYamlName, "w")
+		fo.write("latitude: " + str(self.centerLat) + "\n")
+		fo.write("longitude: " + str(self.centerLon) + "\n")
+		fo.close()
+
+
+		print "| Created file", outputYamlName
+
+	def movePNGToStageFolder(self, pathToPNG, outputDir):
+		os.shutil.copyfile(pathToPNG, outputDir)
+		print "| Copied output PNG"
 
 if __name__ == "__main__":
 
-	world = StageWorld([443, 700], [1300, 4800], [-45.12, 14.4334])
+	world = StageWorld([443, 700], [1300, 4800], [-45.12, 14.4334], [4.2,444.355])
 
 	world.createStageSetup("street1")

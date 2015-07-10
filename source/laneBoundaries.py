@@ -17,7 +17,7 @@ class LaneBoundaries:
 
 
 	# size of image, scalar for pixel/meter, array containing all left and right road lane segments
-	def makeImage(self, boundarySize, scalar, roadLanes, centerLanes, laneSegmentWidths):
+	def makeImage(self, boundarySize, scalar, roadLanes, centerLanes, laneSegmentWidths, pngName):
 
 		size = [0,0]
 
@@ -221,7 +221,7 @@ class LaneBoundaries:
 		imgGreyScale = cv2.transpose(imgGreyScale)
 		imgGreyScale = cv2.flip(imgGreyScale,flipCode=-1)
 
-		cv2.imwrite('map.png',imgGreyScale)
+		cv2.imwrite(pngName,imgGreyScale)
 		cv2.waitKey(0)
 		cv2.destroyAllWindows()
-		os.system('xdg-open ' + 'map.png')
+		os.system('xdg-open ' + pngName)

@@ -12,6 +12,7 @@ from getOsmFile import getOsmFile
 from roadSmoothing import SmoothRoad
 from laneBoundaries import LaneBoundaries
 from catmull_rom_spline import catmull_rom
+from createStageFiles import StageWorld
 import matplotlib.pyplot as plt
 
 
@@ -47,6 +48,12 @@ parser.add_argument('-o', '--osmFile', help='Name of the osm file generated',
 parser.add_argument('-O', '--inputOsmFile', help='Name of the Input osm file',
                     type=str,
                     default='')
+parser.add_argument('--stage', 
+                    help='Generate Stage World',
+                    action='store_true')
+parser.add_argument('--name', help='Name of stage output name',
+                    type=str,
+                    default='osm-map')
 parser.add_argument('-i', '--imageFile',
                     help='Generate and name .png image of the selected areas',
                     type=str,
@@ -320,11 +327,15 @@ print ('|-----------------------------------')
 print ('|')
 size = osmRoads.getMapSize()
 #    args.imageFile = args.directory + args.imageFile
-lanes.makeImage(size, 5, roadLaneSegments, centerLaneSegments, laneSegmentWidths)
+lanes.makeImage(size, 5, roadLaneSegments, centerLaneSegments, laneSegmentWidths, args.name + ".png")
 
 print ('| Lat Center  = '+ str(osmRoads.getLat()))
 print ('| Lon Center  = '+ str(osmRoads.getLon()))
 
+if args.stage:
+    stage = StageWorld([443, 700], [1300, 4800], [-45.12, 14.4334], [4.2,444.355])
+
+    stage.createStageSetup(args.name)
 
 #plt.show()
 
