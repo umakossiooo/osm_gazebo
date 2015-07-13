@@ -11,8 +11,11 @@ from getMapImage import getMapImage
 from getOsmFile import getOsmFile
 from roadSmoothing import SmoothRoad
 from laneBoundaries import LaneBoundaries
+from catmull_rom_spline import catmull_rom
+from createStageFiles import StageWorld
 import matplotlib.pyplot as plt
-import math
+
+
 
 TIMER = 1
 
@@ -45,6 +48,12 @@ parser.add_argument('-o', '--osmFile', help='Name of the osm file generated',
 parser.add_argument('-O', '--inputOsmFile', help='Name of the Input osm file',
                     type=str,
                     default='')
+parser.add_argument('--stage', 
+                    help='Generate Stage World',
+                    action='store_true')
+parser.add_argument('--name', help='Name of stage output name',
+                    type=str,
+                    default='osm-map')
 parser.add_argument('-i', '--imageFile',
                     help='Generate and name .png image of the selected areas',
                     type=str,
@@ -221,6 +230,7 @@ lanes = 0
 
 roadLaneSegments = []
 centerLaneSegments = []
+laneSegmentWidths = []
 
 #Include the roads in the map in sdf file
 for idx, road in enumerate(roadPointWidthMap.keys()):
@@ -230,6 +240,8 @@ for idx, road in enumerate(roadPointWidthMap.keys()):
 
     print ('| Road' + str(idx+1) + ': ' + road)
 
+    laneSegmentWidths.append(roadPointWidthMap[road]['width'])
+    print "|  -- Width: ", str(roadPointWidthMap[road]['width'])
 
     xData = points[0, :]
     yData = points[1, :]
@@ -259,100 +271,41 @@ for idx, road in enumerate(roadPointWidthMap.keys()):
         centerLaneSegments.append([x,y])
 
     else:
-        x = []
 
-        for j in np.arange(len(xData)-1):
-            if j != (len(xData)):
-
-                
-
-                if xData[j] > xData[j+1]:
-                    # Decreasing. 
-                    xDataNeg = [-1*xData[j], -1*xData[j+1]]
-                    xTemp = []
-                    res = 100
-
-                    # Should only have two values, j and j+1
-                    temp = np.linspace(xDataNeg[0], xDataNeg[1], res)
-
-                    for t in np.arange(len(temp)):
-                        if (j != 0) and (t == 0):
-                            continue
-                        else:
-                            x.append(-temp[t])
-                else:
-                    # Increasing.
-                    xTemp = []
-                    res = 100
-
-                    temp = np.linspace(xData[j], xData[j+1], res)
-
-                    for t in np.arange(len(temp)):
-                        if (j != 0) and (t == 0):
-                            continue
-                        else:
-                            x.append(temp[t])                   
-
-
-        hermite = SmoothRoad()
-
-        eps = 0.00001
-
-        xPts, yPts = hermite.simplify(xData, yData, eps)
-
-        y = []
-        for t in range(len(x)):
-            if t != (len(x)-1):
-                if x[t] < x[t+1]:
-                    tension = 0.1
-                    bias = 0.5
-                    continuity = 0.5
-                    increasing = True
-                else:
-                    tension = 0.5
-                    bias = 0.0
-                    continuity = -1.0
-                    increasing = False
-            for i in range(len(xPts) - 1):        
-                if increasing:
-                    if (xPts[i] <= x[t]) and (xPts[i+1] > x[t]):
-                        break 
-                else:
-                    if (xPts[i] >= x[t]) and (xPts[i+1] < x[t]):
-                        break                        
-            deriv0, deriv1 = hermite.derivative(xPts, yPts, i, tension, bias, continuity)
-            y.append(hermite.interpolate(xPts, yPts, i, deriv0, deriv1, x[t])) 
-
-        xSimp, ySimp = hermite.simplify(x, y, eps)
+        x, y = catmull_rom(xData, yData, 10)
 
         centerLaneSegments.append([x, y])
 
-        lanes = LaneBoundaries(xSimp, ySimp)
+        lanes = LaneBoundaries(x,y)
 
-        [lanePointsA, lanePointsB]  = lanes.createLanes(6)
+        # [lanePointsA, lanePointsB]  = lanes.createLanes(6)
 
-        roadLaneSegments.append([lanePointsA, lanePointsB])
+        # roadLaneSegments.append([lanePointsA, lanePointsB])
 
-        xPointsA = []
-        yPointsA = []
+        # xPointsA = []
+        # yPointsA = []
 
-        xPointsB = []
-        yPointsB = []
+        # xPointsB = []
+        # yPointsB = []
 
-        for i in range(len(lanePointsA)/2):
-            xPointsA.append(lanePointsA[i*2][0])
-            yPointsA.append(lanePointsA[i*2][1])
-            #sdfFile.addLeftLaneDebug([lanePointsA[i*2][0], lanePointsA[i*2][1], 0], road)
+        # for i in range(len(lanePointsA)/2):
+        #     xPointsA.append(lanePointsA[i*2][0])
+        #     yPointsA.append(lanePointsA[i*2][1])
+        #     #sdfFile.addLeftLaneDebug([lanePointsA[i*2][0], lanePointsA[i*2][1], 0], road)
 
-            xPointsB.append(lanePointsB[i*2][0])
-            yPointsB.append(lanePointsB[i*2][1])
-            #sdfFile.addRightLaneDebug([lanePointsB[i*2][0], lanePointsB[i*2][1], 0], road)
+        #     xPointsB.append(lanePointsB[i*2][0])
+        #     yPointsB.append(lanePointsB[i*2][1])
+        #     #sdfFile.addRightLaneDebug([lanePointsB[i*2][0], lanePointsB[i*2][1], 0], road)
 
+#### Debug
         #plt.plot(xData, yData, 'bo', x, y, 'r-', xPointsA, yPointsA, 'g-', xPointsB, yPointsB, 'g-')
         #plt.plot(xPointsA, yPointsA, 'g-', xPointsB, yPointsB, 'g-')
         #plt.plot(xData, yData, 'ro-', x, y, 'b+')
+        #plt.legend(['data', 'catmull'], loc='best')
         ##plt.plot(x, y, 'b+')
         #plt.show()
+#### Debug
+
 
         # lanes.saveImage(size, lanePointsA, lanePointsB)
 
@@ -374,11 +327,15 @@ print ('|-----------------------------------')
 print ('|')
 size = osmRoads.getMapSize()
 #    args.imageFile = args.directory + args.imageFile
-lanes.makeImage(size, 5, roadLaneSegments, centerLaneSegments)
+lanes.makeImage(size, 5, roadLaneSegments, centerLaneSegments, laneSegmentWidths, args.name + ".png")
 
 print ('| Lat Center  = '+ str(osmRoads.getLat()))
 print ('| Lon Center  = '+ str(osmRoads.getLon()))
 
+if args.stage:
+    stage = StageWorld([443, 700], [1300, 4800], [-45.12, 14.4334], [4.2,444.355])
+
+    stage.createStageSetup(args.name)
 
 #plt.show()
 
