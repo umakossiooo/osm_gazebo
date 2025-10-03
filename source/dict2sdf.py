@@ -167,6 +167,8 @@ class GetSDF:
     def writeToFile(self, filename):
         '''Write sdf file'''
         outfile = open(filename, "w")
-        outfile.write(Et.tostring(self.sdf, pretty_print=True,
-                                  xml_declaration=True))
+        xml_string = Et.tostring(self.sdf, pretty_print=True, encoding='unicode')
+        if not xml_string.startswith('<?xml'):
+            xml_string = '<?xml version="1.0" encoding="UTF-8"?>\n' + xml_string
+        outfile.write(xml_string)
         outfile.close()

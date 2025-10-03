@@ -170,7 +170,7 @@ class Osm2Dict:
                                    self.node[node]
                                    .get("lat"))
                 coords = np.reshape(coords,
-                                    (len(coords)/2,
+                                    (len(coords)//2,
                                      2))
 
         pointsXYZ = self.getPoints(coords)
@@ -238,7 +238,7 @@ class Osm2Dict:
 
             coords = np.array([data.get("lon"),
                                data.get("lat")])
-            coords = np.reshape(coords, (len(coords)/2, 2))
+            coords = np.reshape(coords, (len(coords)//2, 2))
 
             modelLocation = self.getPoints(coords)
 
@@ -373,7 +373,7 @@ class Osm2Dict:
                     self.flags = [addFlag]
             return True
         else:
-            print 'Error: Invalid flag! [Valid values : "a", "m", "r", "b"]'
+            print ('Error: Invalid flag! [Valid values : "a", "m", "r", "b"]')
             return False
 
     def getFlags(self):

@@ -34,7 +34,7 @@ def toc():
                - startTime_for_tictoc)
                + " sec")
     else:
-        print "Toc: start time not set"
+        print("Toc: start time not set")
 
 if TIMER:
     tic()
@@ -127,9 +127,9 @@ if args.interactive:
           " coordinates of the area or select from" +
           " default by hitting return twice \n")
 
-    startCoords = raw_input("Enter starting coordinates: " +
+    startCoords = input("Enter starting coordinates: " +
                             "[lon lat] :").split(' ')
-    endCoords = raw_input("Enter ending coordnates: [lon lat]: ").split(' ')
+    endCoords = input("Enter ending coordnates: [lon lat]: ").split(' ')
 
     if (startCoords and endCoords and
             len(startCoords) == 2 and len(endCoords) == 2):
@@ -141,7 +141,7 @@ if args.interactive:
 
     else:
 
-        choice = raw_input("Default Coordinate options: West El " +
+        choice = input("Default Coordinate options: West El " +
                            "Camino Real Highway, CA (2), Bethlehem," +
                            " PA (default=1): ")
 
@@ -153,7 +153,7 @@ if args.interactive:
         startCoords = [37.3596, -122.0129]
         endCoords = [37.3614, -122.0102]
 
-    option = raw_input("Do you want to view the area specified? [Y/N]" +
+    option = input("Do you want to view the area specified? [Y/N]" +
                        " (default: Y): ").upper()
 
     osmFile = 'map.osm'
@@ -241,7 +241,7 @@ for idx, road in enumerate(roadPointWidthMap.keys()):
     print ('| Road' + str(idx+1) + ': ' + road)
 
     laneSegmentWidths.append(roadPointWidthMap[road]['width'])
-    print "|  -- Width: ", str(roadPointWidthMap[road]['width'])
+    print("|  -- Width: " + str(roadPointWidthMap[road]['width']))
 
     xData = points[0, :]
     yData = points[1, :]

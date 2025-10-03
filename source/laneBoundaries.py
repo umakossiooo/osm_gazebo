@@ -44,7 +44,7 @@ class LaneBoundaries:
 			yOffset = size[1]/2
 
 			laneWidth = int(math.ceil(laneSegmentWidths[idx] * 6 *scalar))
-			print "| MidLane Width: ", str(laneWidth)
+			print("| MidLane Width: " + str(laneWidth))
 
 			if len(midLane[0]) > 2:
 
@@ -73,7 +73,7 @@ class LaneBoundaries:
 
 					# adding a line onto the overall entire image
 					# line width as 60 is equal to 4 meters
-					cv2.line(self.img, (startPointX,startPointY), (endPointX,endPointY), (255,255,255), laneWidth)
+					cv2.line(self.img, (int(startPointX),int(startPointY)), (int(endPointX),int(endPointY)), (255,255,255), laneWidth)
 			else:
 				# If there is only one point, we can draw anything, so disregard it
 				#print ('Road has LESS then four points!')
@@ -86,20 +86,20 @@ class LaneBoundaries:
 					endPointX = (int(midLane[0][1]* scalar) ) + xOffset
 					endPointY = (int(midLane[1][1]* scalar)) + yOffset
 
-					cv2.line(self.img, (startPointX,startPointY), (endPointX,endPointY), (255,255,255), laneWidth)
+					cv2.line(self.img, (int(startPointX),int(startPointY)), (int(endPointX),int(endPointY)), (255,255,255), laneWidth)
 
 				elif len(midLane[0]) <= 4 and len(midLane[0]) > 1:
 					startPointX = (int(midLane[0][0]* scalar) ) + xOffset
 					startPointY = (int(midLane[1][0]* scalar) ) + yOffset
 					endPointX = (int(midLane[0][1]* scalar) ) + xOffset
 					endPointY = (int(midLane[1][1]* scalar)) + yOffset
-					cv2.line(self.img, (startPointX,startPointY), (endPointX,endPointY), (255,255,255),laneWidth)
+					cv2.line(self.img, (int(startPointX),int(startPointY)), (int(endPointX),int(endPointY)), (255,255,255),laneWidth)
 
 					startPointX = (int(road[0][1]* scalar) ) + xOffset
 					startPointY = (int(road[1][1]* scalar) ) + yOffset
 					endPointX = (int(road[0][2]* scalar) ) + xOffset
 					endPointY = (int(road[1][2]* scalar)) + yOffset
-					cv2.line(self.img, (startPointX,startPointY), (endPointX,endPointY), (255,255,255),laneWidth)
+					cv2.line(self.img, (int(startPointX),int(startPointY)), (int(endPointX),int(endPointY)), (255,255,255),laneWidth)
 
 
 		# # Drawing the side lanes
