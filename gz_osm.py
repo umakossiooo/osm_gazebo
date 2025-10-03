@@ -150,17 +150,20 @@ if args.interactive:
         #     endCoords = [37.3574, -122.0081]
 
         # else:
-        startCoords = [37.3596, -122.0129]
-        endCoords = [37.3614, -122.0102]
+        # Format: [lon, lat] to match user input format
+        startCoords = [-122.0129, 37.3596]
+        endCoords = [-122.0102, 37.3614]
 
     option = input("Do you want to view the area specified? [Y/N]" +
                        " (default: Y): ").upper()
 
     osmFile = 'map.osm'
-    args.boundingbox = [min(startCoords[1], endCoords[1]),
-                        min(startCoords[0], endCoords[0]),
-                        max(startCoords[1], endCoords[1]),
-                        max(startCoords[0], endCoords[0])]
+    # Format: MinLon MinLat MaxLon MaxLat
+    # startCoords and endCoords are [lon, lat]
+    args.boundingbox = [min(startCoords[0], endCoords[0]),  # MinLon
+                        min(startCoords[1], endCoords[1]),  # MinLat  
+                        max(startCoords[0], endCoords[0]),  # MaxLon
+                        max(startCoords[1], endCoords[1])]  # MaxLat
 
     if option != 'N':
         args.imageFile = 'map.png'
@@ -226,7 +229,8 @@ print ('|-----------------------------------')
 
 #fig = plt.figure()
 
-lanes = 0
+# Initialize lanes object with empty data - will be updated in the loop
+lanes = LaneBoundaries([], [])
 
 roadLaneSegments = []
 centerLaneSegments = []
