@@ -1,0 +1,10 @@
+# Core dependencies required for OSM to Gazebo conversion
+numpy>=1.19.0
+lxml>=4.6.0
+matplotlib>=3.3.0
+opencv-python>=4.5.0
+osmapi>=1.3.0
+
+# Optional dependencies for enhanced functionality
+# mapnik>=3.0.0  # Uncomment if you want better map image generation
+# pep8>=1.7.0    # Uncomment for code style checking during development
